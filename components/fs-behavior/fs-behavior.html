@@ -1,0 +1,34 @@
+<script>
+  var FSBehavior = {
+    
+    properties: {
+      
+      /**
+       * Optional name of the sdk client to use.
+       */
+      clientName: {
+        type: String,
+        value: 'default',
+        reflectToAttribute: true
+      }
+      
+    },
+    
+    getClient: function(){
+      var clientElement = this.$$('fs-client');
+      if(clientElement){
+        return clientElement.client;
+      }
+    },
+    
+    isAuthenticated: function(){
+      var clientElement = this.$$('fs-client');
+      if(clientElement){
+        return clientElement.authenticated;
+      } else {
+        return false;
+      }
+    }
+    
+  };
+</script>
