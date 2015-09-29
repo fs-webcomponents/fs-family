@@ -61,9 +61,7 @@ You may have the children list collapsed by default:
         color: --secondary-text-color;
       }
     </style>
-    <fs-client client-name="[[clientName]]" on-authenticated-changed="_loadCouple"></fs-client>
-    <fs-person-cache client-name="[[clientName]]" person-id="[[husbandId]]" person="{{husband}}"></fs-person-cache>
-    <fs-person-cache client-name="[[clientName]]" person-id="[[wifeId]]" person="{{wife}}"></fs-person-cache>
+    <fs-client name="[[clientName]]" on-authenticated-changed="_loadCouple"></fs-client>
     <paper-card>
       <div class="card-content">
         <fs-person-chip client-name="[[clientName]]" person-id="[[husbandId]]"></fs-person-chip>
@@ -118,7 +116,8 @@ You may have the children list collapsed by default:
       
       husbandId: {
         type: String,
-        notify: true
+        notify: true,
+        observer: '_loadHusband'
       },
       
       wife: {
@@ -129,7 +128,8 @@ You may have the children list collapsed by default:
       
       wifeId: {
         type: String,
-        notify: true
+        notify: true,
+        observer: '_loadWife'
       },
       
       /**
@@ -234,6 +234,24 @@ You may have the children list collapsed by default:
               self.push('_childrenIds', rel.getChildId());
             }
           }
+        });
+      }
+    },
+    
+    _loadHusband: function(){
+      if(this.husbandId){
+        var self = this;
+        this.getClient().getPerson(this.husbandId).then(function(response){
+          self.husband = response.getPerson();
+        });
+      }
+    },
+    
+    _loadWife: function(){
+      if(this.husbandId){
+        var self = this;
+        this.getClient().getPerson(this.wifeId).then(function(response){
+          self.wife = response.getPerson();
         });
       }
     },
