@@ -64,8 +64,8 @@ You may have the children list collapsed by default:
     <fs-client name="[[clientName]]" on-authenticated-changed="_loadCouple"></fs-client>
     <paper-card>
       <div class="card-content">
-        <fs-person-chip client-name="[[clientName]]" person-id="[[husbandId]]"></fs-person-chip>
-        <fs-person-chip client-name="[[clientName]]" person-id="[[wifeId]]"></fs-person-chip>
+        <fs-person-chip id="husbandChip" client-name="[[clientName]]" person-id="[[husbandId]]"></fs-person-chip>
+        <fs-person-chip id="wifeChip" client-name="[[clientName]]" person-id="[[wifeId]]"></fs-person-chip>
       </div>
       <div id="children" hidden$="{{!includeChildren}}">
         <paper-button id="childrenButton" on-click="_toggleChildren" noink>{{_buttonText(childrenCollapsed)}}</paper-button>
@@ -165,7 +165,9 @@ You may have the children list collapsed by default:
       
       _childrenIds: {
         type: Array,
-        value: []
+        value: function(){
+          return [];
+        }
       }
       
     },
@@ -248,7 +250,7 @@ You may have the children list collapsed by default:
     },
     
     _loadWife: function(){
-      if(this.husbandId){
+      if(this.wifeId){
         var self = this;
         this.getClient().getPerson(this.wifeId).then(function(response){
           self.wife = response.getPerson();
