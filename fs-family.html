@@ -183,15 +183,17 @@ You may have the children list collapsed by default:
       if(!this.coupleRequested && !this.couple && this.coupleUrl && this.isAuthenticated()){
         var self = this;
         this._setCoupleRequested(true);
-        this.getClient().getCouple(this.coupleUrl).then(function(response){
-          self.couple = response.getRelationship();
+        this.getClient().get(this.coupleUrl, function(error, response){
+          if(response && response.data){
+            self.couple = response.data.relationships[0];
+          }
         });
       }
     },
     
     _processCouple: function(){
-      this.husbandId = this.couple.getHusbandId();
-      this.wifeId = this.couple.getWifeId();
+      this.husbandId = this.couple.person1.resourceId;
+      this.wifeId = this.couple.person2.resourceId;
     },
     
     _loadChildren: function(){
@@ -201,16 +203,16 @@ You may have the children list collapsed by default:
         this._setChildrenRequested(true);
         
         var parent = this.husband;
-        if(!(parent instanceof FamilySearch.Person)){
+        if(!parent){
           parent = this.wife;
         }
         
         // TODO: just load children relationships when available; this method
         // currently loads the children objects too.
         // https://github.com/FamilySearch/familysearch-javascript-sdk/issues/108
-        parent.getChildren().then(function(response){
+        this.getClient().get('/platform/tree/persons/' + parent.id + '/children', function(error, response){
           
-          // We wait to calculate the spouse ID until after the respone
+          // We wait to calculate the spouse ID until after the response
           // returns so that there's time to set both spouses. If the spouses
           // are being set via JavaScript then this method will fire after the
           // first spouse is set. Having one spouse is sometimes valid so we
@@ -220,10 +222,10 @@ You may have the children list collapsed by default:
           // So now we calculate the ID of the spouse.
           var husbandId, wifeId;
           if(self.husband){
-            husbandId = self.husband.getId();
+            husbandId = self.husband.id;
           }
           if(self.wife){
-            wifeId = self.wife.getId();
+            wifeId = self.wife.id;
           }
           
           var relationships = response.getChildAndParentsRelationships(),
@@ -243,8 +245,10 @@ You may have the children list collapsed by default:
     _loadHusband: function(){
       if(this.husbandId){
         var self = this;
-        this.getClient().getPerson(this.husbandId).then(function(response){
-          self.husband = response.getPerson();
+        this.getClient().get('/platform/tree/persons/' + this.husbandId, function(error, response){
+          if(response && response.data){
+            self.husband = response.data.persons[0];
+          }
         });
       }
     },
@@ -252,8 +256,10 @@ You may have the children list collapsed by default:
     _loadWife: function(){
       if(this.wifeId){
         var self = this;
-        this.getClient().getPerson(this.wifeId).then(function(response){
-          self.wife = response.getPerson();
+        this.getClient().get('/platform/tree/persons/' + this.wifeId, function(error, response){
+          if(response && response.data){
+            self.wife = response.data.persons[0];
+          }
         });
       }
     },
@@ -263,8 +269,7 @@ You may have the children list collapsed by default:
      */
     _loadChildrenReady: function(){
       return this.isAuthenticated() && !this.childrenRequested && this.includeChildren
-        && ((this.husband && this.husband instanceof FamilySearch.Person)
-          || (this.wife && this.wife instanceof FamilySearch.Person));
+        && (this.husband || this.wife);
     },
     
     _buttonText: function(){
